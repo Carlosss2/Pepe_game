@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Pepe el Cerdito - Edición Móvil Avanzada</title>
+  <title>Pepe el Cerdito - Edición Híbrida Total</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,8 +16,7 @@
     <div id="ui-overlay">
       <div id="top-bar">
         <div class="score-display">
-          <!-- Contador dinámico -->
-          <div id="score"></div>
+          <div id="score">0</div>
           <div id="high-score">RECORD: 0</div>
         </div>
         <div class="hud-right">
@@ -34,10 +33,10 @@
         <div id="progress-track"><div id="progress-fill"></div></div>
       </div>
       
-      <div id="controls-hint">Toca en cualquier parte para saltar</div>
+      <div id="controls-hint">Toca la pantalla para saltar</div>
     </div>
 
-    <!-- MENÚ PRINCIPAL (Optimizado para Dedos/Móvil) -->
+    <!-- MENÚ PRINCIPAL -->
     <div id="menu-overlay">
       <div class="menu-header">
         <h1 class="menu-title">PEPE</h1>
@@ -55,11 +54,11 @@
         </div>
       </div>
 
-      <div class="selector-title">SELECCIONAR ESCENARIO</div>
-      
-      <!-- Lista en scroll vertical fluido (Estilo Mobile Settings) -->
-      <div class="theme-list-scroll">
-        <div class="theme-list-container" id="theme-grid"></div>
+      <div class="selector-section">
+        <div class="selector-title">SELECCIONAR ESCENARIO</div>
+        <div class="theme-list-scroll">
+          <div class="theme-list-container" id="theme-grid"></div>
+        </div>
       </div>
       
       <button class="btn-primary" id="start-btn">INICIAR JUEGO</button>

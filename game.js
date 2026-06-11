@@ -21,7 +21,7 @@ const MILESTONES = [
 ];
 
 // ============================================================
-//  SISTEMA NATIVO INDEXEDDB (PERSISTENCIA TOTAL)
+//  SISTEMA NATIVO INDEXEDDB (PERSISTENCIA COMPLETA)
 // ============================================================
 const DB_NAME = 'PepeCerditoDB';
 const DB_VERSION = 1;
@@ -42,9 +42,7 @@ const DB = {
         this.db = e.target.result;
         resolve(true);
       };
-      request.onerror = () => {
-        resolve(false); // Failsafe cooperativo
-      };
+      request.onerror = () => resolve(false);
     });
   },
   async get(key, defaultVal) {
@@ -81,11 +79,9 @@ const THEMES = [
       g.addColorStop(0,'#87CEEB');g.addColorStop(.7,'#B0E0FF');g.addColorStop(1,'#E0F0FF');
       ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
       for(let i=0;i<6;i++){let x=(i*150+Date.now()*.01)%(w+200)-100;
-        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.arc(x,30+i*25,20+i*5,0,Math.PI*2);ctx.fill()}
+        ctx.fillStyle='rgba(255,255,255,0.4)';ctx.beginPath();ctx.arc(x,30+i*25,20+i*5,0,Math.PI*2);ctx.fill()}
     },
-    drawObs(ctx,t,x,y,w,h){
-      ctx.fillStyle='#4CAF50';ctx.fillRect(x+4,y,w-8,h);
-    }},
+    drawObs(ctx,t,x,y,w,h){ctx.fillStyle='#4CAF50';ctx.fillRect(x+3,y,w-6,h);}},
   {id:'outlast',name:'Outlast',
     bg:['#0a0000','#1a0505'],ground:'#2a1010',groundLine:'#1a0000',
     groundTop:'#3a1515',decorColor:'rgba(255,0,0,0.12)',
@@ -122,12 +118,12 @@ const THEMES = [
 ];
 
 // ============================================================
-//  NÚCLEO DEL MODELO DE LOGIC
+//  NÚCLEO DEL MODELO DE LÓGICA
 // ============================================================
 const Model = {
   state:'menu',
-  score:0,        // Score real interno
-  renderScore:0,  // Score dinámico visual (Efecto Odómetro)
+  score:0,
+  renderScore:0,
   highScore:0,gamesPlayed:0,
   speed:BASE_SPEED,currentTheme:0,startTheme:0,
   milestoneIndex:0,groundOffset:0,topSpeed:0,
@@ -178,7 +174,7 @@ const Model = {
   checkCollision(){
     const p=this.pig,px=p.x+8,py=p.y+8,pw=p.w-16,ph=p.h-16;
     for(const o of this.obstacles){
-      const ox=o.x+4,oy=o.y+4,ow=o.w-8,oh=o.h-8;
+      const ox=o.x+3,oy=o.y+3,ow=o.w-6,oh=o.h-6;
       if(px<ox+ow&&px+pw>ox&&py<oy+oh&&py+ph>oy)return true;
     }
     return false;
@@ -279,7 +275,6 @@ const View = {
     ctx.restore();
   },
 
-  // Manejo fluido de renderizado del odómetro
   animateScore(rendered, target, highScore) {
     this.els.score.textContent = Math.floor(rendered);
     this.els.highScore.textContent = 'RECORD: ' + Math.max(Math.floor(rendered), highScore);
@@ -340,30 +335,15 @@ const View = {
 
   resize(){
     const wrapper=document.getElementById('game-wrapper');
-    const isMobile = window.innerWidth <= 600;
-    const pad = isMobile ? 0 : 64;
-    const vPad = isMobile ? 0 : 64;
-    
-    const availW = window.innerWidth - pad;
-    const availH = window.innerHeight - vPad;
-    
-    const aspect = 800 / 300;
-    
-    let w = availW;
-    let h = w / aspect;
-    
-    if (h > availH) {
-      h = availH;
-      w = h * aspect;
-    }
-    
-    wrapper.style.width = Math.floor(w) + 'px';
-    wrapper.style.height = Math.floor(h) + 'px';
+    const container=document.getElementById('game-container');
+    const maxW=Math.min(container.clientWidth, 850);
+    wrapper.style.width=maxW+'px';
+    wrapper.style.height=(maxW*(300/800))+'px';
   }
 };
 
 // ============================================================
-//  CONTROLADOR (VIEWMODEL) - INTERACCIONES Y BUCLE DE JUEGO
+//  CONTROLADOR - INTERACCIONES Y BUCLE DE JUEGO
 // ============================================================
 const VM = {
   model:Model,view:View,
@@ -372,7 +352,6 @@ const VM = {
   async init(){
     const m=this.model;
     
-    // Inicializar base de datos IndexedDB
     await DB.init();
     m.highScore = await DB.get('highScore', 0);
     m.gamesPlayed = await DB.get('gamesPlayed', 0);
@@ -399,18 +378,23 @@ const VM = {
   },
 
   bindInputs(){
-    // Área TOUCH Completa en el canvas para saltos instantáneos y cómodos en móvil
-    View.canvas.addEventListener('touchstart',(e)=>{
+    const container = document.getElementById('game-container');
+
+    // SOLUCIÓN USABILIDAD MÓVIL: Tocar en CUALQUIER zona libre de la pantalla ejecuta el salto
+    container.addEventListener('touchstart',(e)=>{
+      // Permitir el click normal en botones reales de la UI
+      if(e.target.tagName === 'BUTTON' || e.target.closest('.theme-list-scroll')) return;
       e.preventDefault();
       if(this.model.state==='playing') this.model.jump();
     },{passive:false});
 
-    View.canvas.addEventListener('mousedown',(e)=>{
+    container.addEventListener('mousedown',(e)=>{
+      if(e.target.tagName === 'BUTTON' || e.target.closest('.theme-list-scroll')) return;
       e.preventDefault();
       if(this.model.state==='playing') this.model.jump();
     });
 
-    // Teclado Desktop Failsafe
+    // Teclado para Laptops/PC
     document.addEventListener('keydown',(e)=>{
       if(e.code==='Space'||e.key===' '){
         e.preventDefault();
@@ -476,7 +460,6 @@ const VM = {
     this.view.showGameOver(m.score,m.highScore,m.currentTheme,m.topSpeed,ach);
     this.shakeTime=.25;this.shakeIntensity=5;
     
-    // Explosión de partículas estilizadas al colisionar
     m.addParticles(Array.from({length:25},()=>{
       const a=Math.random()*Math.PI*2;
       return{x:m.pig.x+20,y:m.pig.y+20,vx:Math.cos(a)*(60+Math.random()*240),vy:Math.sin(a)*(60+Math.random()*240)-60,
@@ -500,10 +483,8 @@ const VM = {
     if(m.speed<MAX_SPEED)m.speed+=SPEED_INCR*dt;
     m.topSpeed=Math.max(m.topSpeed,m.speed);
 
-    // Incremento interno del puntaje
     m.score+=Math.round(m.speed*dt*.06);
     
-    // Suavizado dinámico del odómetro visual (Lógica Score Dinámico)
     if(m.renderScore<m.score){
       m.renderScore+= (m.score - m.renderScore) * 12 * dt; 
       if(m.score - m.renderScore < 1) m.renderScore = m.score;
@@ -514,7 +495,6 @@ const VM = {
     m.trail=m.trail.filter(t=>{t.life-=dt*4;return t.life>0});
     if(m.trail.length>5)m.trail.shift();
 
-    // Progresión de mundos automática en base a score
     const adv=Math.floor(m.score/THEME_CHANGE_EVERY);
     const exp=Math.min(m.startTheme+adv,THEMES.length-1);
     if(exp!==m.currentTheme){
@@ -522,7 +502,6 @@ const VM = {
       this.view.updateThemeLabel(m.theme);m.obstacles=[];this.obstacleTimer=1.0;
     }
 
-    // Comprobación dinámica de Hitos alcanzados
     for(let i=m.milestoneIndex;i<MILESTONES.length;i++){
       if(m.score>=MILESTONES[i].score){
         m.milestoneIndex=i+1;this.view.showMilestone(MILESTONES[i].name);
