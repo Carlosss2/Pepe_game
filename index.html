@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Pepe el Cerdito - Edición Móvil Avanzada</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-container">
+  <div id="game-wrapper">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- INTERFAZ JUGANDO (HUD) -->
+    <div id="ui-overlay">
+      <div id="top-bar">
+        <div class="score-display">
+          <!-- Contador dinámico -->
+          <div id="score"></div>
+          <div id="high-score">RECORD: 0</div>
+        </div>
+        <div class="hud-right">
+          <div id="theme-label">Clásico</div>
+          <button id="pause-btn" aria-label="Pausar"></button>
+        </div>
+      </div>
+      
+      <div id="milestone"></div>
+      <div id="theme-name"></div>
+      
+      <div id="progress-bar">
+        <div id="progress-label">Siguiente Hito</div>
+        <div id="progress-track"><div id="progress-fill"></div></div>
+      </div>
+      
+      <div id="controls-hint">Toca en cualquier parte para saltar</div>
+    </div>
+
+    <!-- MENÚ PRINCIPAL (Optimizado para Dedos/Móvil) -->
+    <div id="menu-overlay">
+      <div class="menu-header">
+        <h1 class="menu-title">PEPE</h1>
+        <p class="menu-subtitle">AVENTURERO</p>
+      </div>
+      
+      <div class="menu-meta">
+        <div class="meta-card">
+          <span class="meta-label">MEJOR PUNTUACIÓN</span>
+          <span class="meta-value" id="menu-highscore">0</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">PARTIDAS JUGADAS</span>
+          <span class="meta-value" id="menu-games">0</span>
+        </div>
+      </div>
+
+      <div class="selector-title">SELECCIONAR ESCENARIO</div>
+      
+      <!-- Lista en scroll vertical fluido (Estilo Mobile Settings) -->
+      <div class="theme-list-scroll">
+        <div class="theme-list-container" id="theme-grid"></div>
+      </div>
+      
+      <button class="btn-primary" id="start-btn">INICIAR JUEGO</button>
+    </div>
+
+    <!-- PANTALLA GAME OVER -->
+    <div id="gameover-overlay">
+      <div class="go-header">FIN DEL JUEGO</div>
+      
+      <div class="go-center-score">
+        <span class="go-label">Puntaje Obtenido</span>
+        <div class="go-score" id="final-score">0</div>
+        <div class="go-record" id="final-record">RECORD: 0</div>
+      </div>
+      
+      <div id="final-achievement" class="go-achievement"></div>
+      
+      <div class="go-stats">
+        <div class="stat-box">
+          <span class="stat-label">MUNDO</span>
+          <span class="stat-val" id="go-theme">Clásico</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">VELOCIDAD MÁX.</span>
+          <span class="stat-val" id="go-top-speed">0</span>
+        </div>
+      </div>
+      
+      <div class="go-btns">
+        <button class="btn-primary" id="restart-btn">REINTENTAR</button>
+        <button class="btn-secondary" id="menu-btn">IR AL MENÚ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
